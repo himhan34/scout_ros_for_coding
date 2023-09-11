@@ -1,77 +1,33 @@
 /* 
- * scout_messenger.hpp
+ * scout_params.hpp
  * 
- * Created on: Jun 14, 2019 10:24
- * Description: 
+ * Created on: Sep 27, 2019 15:08
+ * Description: 스카우트 로봇의 매개변수 정의
  * 
- * Copyright (c) 2019 Ruixiang Du (rdu)
+ * Copyright (c) 2020 Ruixiang Du (rdu)
  */
 
-#ifndef SCOUT_MESSENGER_HPP
-#define SCOUT_MESSENGER_HPP
-
-#include <string>
-
-#include <ros/ros.h>
-#include <nav_msgs/Odometry.h>
-// #include <tf/transform_broadcaster.h>
-#include <tf2_ros/transform_broadcaster.h>
-
-#include "scout_msgs/ScoutLightCmd.h"
-#include "ugv_sdk/mobile_robot/scout_robot.hpp"
-#include <mutex>
+#ifndef SCOUT_PARAMS_HPP
+#define SCOUT_PARAMS_HPP
 
 namespace westonrobot
 {
-class ScoutROSMessenger
-{
-public:
-    explicit ScoutROSMessenger(ros::NodeHandle *nh);
-    ScoutROSMessenger(ScoutRobot *scout, ros::NodeHandle *nh, bool is_scout_omni);
+    struct ScoutParams
+    {
+        /* 스카우트 로봇 매개변수 */
+        static constexpr double max_steer_angle = 30.0; // 최대 스티어링 각도 (도 단위)
 
-    std::string odom_frame_;
-    std::string base_frame_;
-    std::string odom_topic_name_;
-    bool pub_tf;
-    bool is_scout_omni;
-    bool simulated_robot_ = false;
-    int sim_control_rate_ = 50;
+        static constexpr double track = 0.58306;      // 트랙 너비 (미터, 왼쪽 및 오른쪽 바퀴 간 거리)
+        static constexpr double wheelbase = 0.498;    // 휠베이스 (미터, 전방 및 후방 바퀴 간 거리)
+        static constexpr double wheel_radius = 0.165; // 휠 반지름 (미터)
 
-    void SetupSubscription();
-
-    void PublishStateToROS();
-    void PublishSimStateToROS(double linear, double angular);
-
-    void GetCurrentMotionCmdForSim(double &linear, double &angular);
-
-private:
-    ScoutRobot *scout_;
-    ros::NodeHandle *nh_;
-
-    std::mutex twist_mutex_;
-    geometry_msgs::Twist current_twist_;
-
-    ros::Publisher odom_publisher_;
-    ros::Publisher status_publisher_;
-    ros::Publisher BMS_status_publisher_;
-    ros::Subscriber motion_cmd_subscriber_;
-    ros::Subscriber light_cmd_subscriber_;
-    tf2_ros::TransformBroadcaster tf_broadcaster_;
-
-    // speed variables
-    double linear_speed_ = 0.0;
-    double angular_speed_ = 0.0;
-    double position_x_ = 0.0;
-    double position_y_ = 0.0;
-    double theta_ = 0.0;
-
-    ros::Time last_time_;
-    ros::Time current_time_;
-
-    void TwistCmdCallback(const geometry_msgs::Twist::ConstPtr &msg);
-    void LightCmdCallback(const scout_msgs::ScoutLightCmd::ConstPtr &msg);
-    void PublishOdometryToROS(double linear, double angular, double dt);
-};
+        // 사용자 매뉴얼 v1.2.8 P18에서 가져온 값
+        // 최대 선형 속도: 1.5 m/s
+        // 최대 각속도: 0.7853 라디안/초
+        static constexpr double max_linear_speed = 1.5;     // 최대 선형 속도 (미터/초)
+        static constexpr double max_angular_speed = 0.7853; // 최대 각속도 (라디안/초)
+        static constexpr double max_speed_cmd = 10.0;       // 최대 속도 명령 (라디안/초)
+    };
 } // namespace westonrobot
 
-#endif /* SCOUT_MESSENGER_HPP */
+#endif /* SCOUT_PARAMS_HPP */
